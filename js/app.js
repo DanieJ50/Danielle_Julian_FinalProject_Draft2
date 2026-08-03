@@ -1,285 +1,415 @@
 "use strict";
 
-const recipes = [
-  {id:"pancakes",name:"Cinnamony Cinnamon Buttermilk Pancakes",category:"breakfast",icon:"🥞",description:"Warm, fluffy pancakes with cinnamon and a soft buttermilk-style tang.",expect:"Fluffy centers, lightly crisp edges, cozy cinnamon warmth, and a soft breakfast-café feel.",tip:"Let the batter rest for a few minutes before cooking for an even fluffier texture.",tags:["fluffy","cinnamon","breakfast"]},
-  {id:"cinnamon-rolls",name:"Microwave Cinnamon Rolls",category:"bakery",icon:"🌀",description:"Soft cinnamon spirals made for a fast cozy bakery-style moment.",expect:"Tender dough, a warm cinnamon center, and sweet glaze energy without a long bake.",tip:"Roll the dough evenly so every bite gets the same cinnamon swirl.",tags:["cinnamon","bakery","microwave"]},
-  {id:"brownie-cake",name:"Brownie Batter Cake",category:"chocolate",icon:"🍫",description:"A chocolate-forward cake with a soft brownie-batter-inspired center.",expect:"Deep cocoa flavor, soft texture, and a rich dessert-bar feeling.",tip:"Stop cooking while the center still looks slightly soft so it stays fudgy.",tags:["chocolate","fudgy","dessert"]},
-  {id:"oreo-bowl",name:"Oreo Frozen Yogurt Bowl",category:"chocolate",icon:"🍨",description:"Cold, creamy, cookie-filled comfort with a crunchy Oreo finish.",expect:"Creamy base, cookie crunch, and a chilled cookies-and-cream vibe.",tip:"Add the cookie pieces last so they stay crisp.",tags:["oreo","chilled","creamy"]},
-  {id:"mocha",name:"Chili Mocha Latte",category:"drinks",icon:"☕",description:"Chocolate coffee with cinnamon warmth and a tiny spark of chili.",expect:"Cozy cocoa, coffee bitterness, cinnamon warmth, and gentle heat at the finish.",tip:"Use only a tiny pinch of chili first; you can always add more.",tags:["coffee","mocha","warm"]},
-  {id:"latte",name:"Iced Vanilla Latte",category:"drinks",icon:"🥤",description:"A smooth, sweet café-style iced drink for a relaxed afternoon.",expect:"Cool milkiness, vanilla sweetness, and a mellow coffee finish.",tip:"Pour coffee over plenty of ice so the drink stays extra cold.",tags:["iced","coffee","vanilla"]},
-  {id:"pizza",name:"Mini Tortilla Pizza",category:"savory",icon:"🍕",description:"A crisp tortilla base with melty cheese and cozy pizza-shop flavor.",expect:"Crisp edges, melty center, savory tomato flavor, and a quick pizza-night vibe.",tip:"Keep toppings light so the tortilla stays crisp.",tags:["pizza","savory","crispy"]},
-  {id:"wrap",name:"Spinach Chicken Wrap",category:"savory",icon:"🌯",description:"A soft wrap packed with savory chicken, greens, and creamy comfort.",expect:"Soft tortilla, savory filling, and a balanced handheld meal.",tip:"Warm the tortilla for a few seconds before rolling to prevent cracking.",tags:["wrap","chicken","savory"]},
-  {id:"cake-pops",name:"CCD Cake Pop Bites",category:"bakery",icon:"🍭",description:"Tiny celebratory cake bites with playful bakery-case energy.",expect:"Soft cake centers, sweet coating, and a fun bite-sized dessert feel.",tip:"Chill the cake bites before coating so they hold their shape.",tags:["cake","party","bakery"]}
-];
+const STORAGE_KEY = "berryVibesStateV1";
 
-const state = {
-  route: "home",
-  filter: "all",
-  search: "",
-  favorites: new Set(),
-  activeRecipe: null
+const defaultState = {
+  xp: 3957,
+  streak: 12,
+  hearts: 5,
+  dailyXp: 70,
+  savedRecipes: [],
+  battleIndex: 0,
+  battleCorrect: 0,
+  currentView: "home"
 };
 
-const pages = [...document.querySelectorAll("[data-page]")];
-const navLinks = [...document.querySelectorAll(".nav-link")];
-const mainNav = document.querySelector("#mainNav");
-const menuButton = document.querySelector("#menuButton");
-const recipeGrid = document.querySelector("#recipeGrid");
-const recipeSearch = document.querySelector("#recipeSearch");
-const filterButtons = [...document.querySelectorAll(".filter")];
-const recipeDialog = document.querySelector("#recipeDialog");
-const closeDialog = document.querySelector("#closeDialog");
-const dialogIcon = document.querySelector("#dialogIcon");
-const dialogCategory = document.querySelector("#dialogCategory");
-const dialogTitle = document.querySelector("#dialogTitle");
-const dialogDescription = document.querySelector("#dialogDescription");
-const dialogExpect = document.querySelector("#dialogExpect");
-const dialogTip = document.querySelector("#dialogTip");
-const dialogSave = document.querySelector("#dialogSave");
-const favoritesButton = document.querySelector("#favoritesButton");
-const favoritesDrawer = document.querySelector("#favoritesDrawer");
-const closeFavorites = document.querySelector("#closeFavorites");
-const favoritesList = document.querySelector("#favoritesList");
-const favoriteCount = document.querySelector("#favoriteCount");
-const battleResult = document.querySelector("#battleResult");
-const berrybelleButton = document.querySelector("#berrybelleButton");
-const berrybelleMessage = document.querySelector("#berrybelleMessage");
-const toast = document.querySelector("#toast");
-
-function goTo(route, updateHash = true) {
-  const valid = pages.some(page => page.dataset.page === route) ? route : "home";
-  state.route = valid;
-
-  pages.forEach(page => page.classList.toggle("active", page.dataset.page === valid));
-  navLinks.forEach(link => link.classList.toggle("active", link.dataset.route === valid));
-
-  mainNav.classList.remove("open");
-  menuButton.setAttribute("aria-expanded", "false");
-
-  if (updateHash) {
-    history.replaceState(null, "", `#${valid}`);
-  }
-
-  window.scrollTo({top: 0, behavior: "smooth"});
-}
-
-function setFilter(filter) {
-  state.filter = filter;
-  filterButtons.forEach(button => button.classList.toggle("active", button.dataset.filter === filter));
-  renderRecipes();
-}
-
-function renderRecipes() {
-  const query = state.search.trim().toLowerCase();
-
-  const visible = recipes.filter(recipe => {
-    const categoryMatch = state.filter === "all" || recipe.category === state.filter;
-    const searchMatch =
-      recipe.name.toLowerCase().includes(query) ||
-      recipe.description.toLowerCase().includes(query) ||
-      recipe.tags.some(tag => tag.includes(query));
-
-    return categoryMatch && searchMatch;
-  });
-
-  recipeGrid.innerHTML = "";
-
-  if (!visible.length) {
-    recipeGrid.innerHTML = '<div class="empty"><h2>No cozy match yet 🍓</h2><p>Try another search or category.</p></div>';
-    return;
-  }
-
-  visible.forEach(recipe => {
-    const saved = state.favorites.has(recipe.id);
-    const card = document.createElement("article");
-    card.className = "recipe-card";
-
-    card.innerHTML = `
-      <div class="recipe-top">
-        <div class="recipe-icon">${recipe.icon}</div>
-        <button class="favorite-toggle ${saved ? "saved" : ""}" data-favorite="${recipe.id}" type="button" aria-label="${saved ? "Remove" : "Save"} ${recipe.name}">
-          ${saved ? "♥" : "♡"}
-        </button>
-      </div>
-      <h2>${recipe.name}</h2>
-      <p>${recipe.description}</p>
-      <div class="tags">${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</div>
-      <button class="pill pink-button view-button" data-open-recipe="${recipe.id}" type="button">View Recipe</button>
-    `;
-
-    recipeGrid.appendChild(card);
-  });
-}
-
-function openRecipe(id) {
-  const recipe = recipes.find(item => item.id === id);
-  if (!recipe) return;
-
-  state.activeRecipe = recipe.id;
-  dialogIcon.textContent = recipe.icon;
-  dialogCategory.textContent = recipe.category;
-  dialogTitle.textContent = recipe.name;
-  dialogDescription.textContent = recipe.description;
-  dialogExpect.textContent = recipe.expect;
-  dialogTip.textContent = recipe.tip;
-  dialogSave.textContent = state.favorites.has(recipe.id) ? "♥ Saved Recipe" : "♡ Save Recipe";
-  recipeDialog.showModal();
-}
-
-function toggleFavorite(id) {
-  const recipe = recipes.find(item => item.id === id);
-  if (!recipe) return;
-
-  if (state.favorites.has(id)) {
-    state.favorites.delete(id);
-    showToast(`${recipe.name} removed from favorites.`);
-  } else {
-    state.favorites.add(id);
-    showToast(`${recipe.name} saved! 🍓`);
-  }
-
-  renderRecipes();
-  renderFavorites();
-
-  if (state.activeRecipe === id && recipeDialog.open) {
-    dialogSave.textContent = state.favorites.has(id) ? "♥ Saved Recipe" : "♡ Save Recipe";
-  }
-}
-
-function renderFavorites() {
-  favoriteCount.textContent = state.favorites.size;
-  favoritesList.innerHTML = "";
-
-  if (!state.favorites.size) {
-    favoritesList.innerHTML = '<div class="favorite-item"><strong>No saved recipes yet.</strong><span>Tap a heart on a recipe card.</span></div>';
-    return;
-  }
-
-  [...state.favorites].forEach(id => {
-    const recipe = recipes.find(item => item.id === id);
-    if (!recipe) return;
-
-    const item = document.createElement("div");
-    item.className = "favorite-item";
-    item.innerHTML = `<strong>${recipe.icon} ${recipe.name}</strong><span>${recipe.description}</span>`;
-    favoritesList.appendChild(item);
-  });
-}
-
-let toastTimer;
-
-function showToast(message) {
-  toast.textContent = message;
-  toast.classList.add("show");
-
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
-}
-
-document.addEventListener("click", event => {
-  const routeLink = event.target.closest("[data-route]");
-  if (routeLink) {
-    event.preventDefault();
-    goTo(routeLink.dataset.route);
-    return;
-  }
-
-  const routeButton = event.target.closest("[data-go]");
-  if (routeButton) {
-    goTo(routeButton.dataset.go);
-
-    if (routeButton.dataset.go === "recipes" && routeButton.dataset.filter) {
-      setFilter(routeButton.dataset.filter);
-    }
-
-    return;
-  }
-
-  const recipeButton = event.target.closest("[data-open-recipe]");
-  if (recipeButton) {
-    openRecipe(recipeButton.dataset.openRecipe);
-    return;
-  }
-
-  const favoriteButton = event.target.closest("[data-favorite]");
-  if (favoriteButton) {
-    toggleFavorite(favoriteButton.dataset.favorite);
-  }
-});
-
-menuButton.addEventListener("click", () => {
-  const open = mainNav.classList.toggle("open");
-  menuButton.setAttribute("aria-expanded", String(open));
-});
-
-recipeSearch.addEventListener("input", () => {
-  state.search = recipeSearch.value;
-  renderRecipes();
-});
-
-filterButtons.forEach(button => {
-  button.addEventListener("click", () => setFilter(button.dataset.filter));
-});
-
-closeDialog.addEventListener("click", () => recipeDialog.close());
-
-recipeDialog.addEventListener("click", event => {
-  const rect = recipeDialog.getBoundingClientRect();
-  const outside =
-    event.clientX < rect.left ||
-    event.clientX > rect.right ||
-    event.clientY < rect.top ||
-    event.clientY > rect.bottom;
-
-  if (outside) recipeDialog.close();
-});
-
-dialogSave.addEventListener("click", () => {
-  if (state.activeRecipe) toggleFavorite(state.activeRecipe);
-});
-
-favoritesButton.addEventListener("click", () => {
-  favoritesDrawer.classList.add("open");
-  favoritesDrawer.setAttribute("aria-hidden", "false");
-});
-
-closeFavorites.addEventListener("click", () => {
-  favoritesDrawer.classList.remove("open");
-  favoritesDrawer.setAttribute("aria-hidden", "true");
-});
-
-document.querySelectorAll(".battle-choice").forEach(button => {
-  button.addEventListener("click", () => {
-    const message = button.dataset.choice === "ccd"
-      ? "🍓 BerryBelle picked the CCD side with you! Soft, swirly, quick, and very cozy."
-      : "🥐 Bakery wins this round! BerryBelle respects a dramatic icing-glaze moment.";
-
-    battleResult.textContent = message;
-    battleResult.classList.remove("pop");
-    void battleResult.offsetWidth;
-    battleResult.classList.add("pop");
-  });
-});
-
-const berryMessages = [
-  "🍓 BerryBelle says: your cozy era looks good on you.",
-  "🎀 BerryBelle says: pick the recipe that sounds the most fun.",
-  "✨ BerryBelle has distributed one complimentary sparkle.",
-  "⚔️ BerryBelle is ready to referee another food battle.",
-  "🥞 BerryBelle votes for a breakfast side quest."
+const recipes = [
+  {id:"cinnamon-pancakes",name:"Cinnamony Cinnamon Buttermilk Pancakes",category:"breakfast",emoji:"🥞",description:"Fluffy cinnamon pancakes with cozy buttermilk-style tang.",tags:["fluffy","cinnamon","breakfast"]},
+  {id:"microwave-rolls",name:"Microwave Cinnamon Rolls",category:"breakfast",emoji:"🌀",description:"Soft spirals with cinnamon warmth and a quick microwave finish.",tags:["warm","soft","quick"]},
+  {id:"clear-glaze-donuts",name:"Clear-Glaze Microwave Donuts",category:"breakfast",emoji:"🍩",description:"Tender little donuts with a glossy sweet finish.",tags:["donut","glaze","fun"]},
+  {id:"brownie-batter-cake",name:"Brownie Batter Cake",category:"chocolate",emoji:"🍫",description:"Deep cocoa flavor with a soft brownie-batter center.",tags:["chocolate","gooey","cake"]},
+  {id:"oreo-bowl",name:"Oreo Frozen Yogurt Bowl",category:"chocolate",emoji:"🍨",description:"Cold creamy crunch with cookie-and-cream energy.",tags:["oreo","cold","creamy"]},
+  {id:"chili-mocha",name:"Chili Mocha Latte",category:"drinks",emoji:"☕",description:"Chocolate coffee warmth with a tiny spicy kick.",tags:["coffee","mocha","spiced"]},
+  {id:"iced-vanilla-latte",name:"Iced Vanilla Latte",category:"drinks",emoji:"🧋",description:"Cold café-style vanilla coffee for an easy cozy sip.",tags:["iced","coffee","vanilla"]},
+  {id:"mini-pizza",name:"Mini Tortilla Pizza",category:"savory",emoji:"🍕",description:"Crisp-edged tortilla pizza with melty cheese comfort.",tags:["pizza","savory","quick"]},
+  {id:"spinach-wrap",name:"Spinach Chicken Wrap",category:"savory",emoji:"🌯",description:"A cozy savory wrap with chicken and fresh greens.",tags:["wrap","chicken","savory"]}
 ];
 
-let berryIndex = 0;
+const battleRounds = [
+  {
+    category:"DONUT DUEL",
+    question:"Which option has the lighter calorie profile?",
+    ccd:{emoji:"🍩",name:"CCD Microwave Donut",calories:120,protein:"6g"},
+    classic:{emoji:"🍩",name:"Fast-Food Donut",calories:260,protein:"4g"},
+    correct:"ccd",
+    explanation:"CCD wins this round with the lighter calorie profile."
+  },
+  {
+    category:"PANCAKE PICK",
+    question:"Which choice is built around the CCD recipe world?",
+    ccd:{emoji:"🥞",name:"CCD Cinnamon Pancakes",calories:210,protein:"8g"},
+    classic:{emoji:"🥞",name:"Diner Pancake Stack",calories:430,protein:"7g"},
+    correct:"ccd",
+    explanation:"You found the CCD recipe! Cozy path unlocked."
+  },
+  {
+    category:"COFFEE CLASH",
+    question:"Which drink is the Berry Vibes CCD choice?",
+    ccd:{emoji:"☕",name:"CCD Chili Mocha",calories:95,protein:"5g"},
+    classic:{emoji:"🥤",name:"Coffee-Shop Mocha",calories:330,protein:"7g"},
+    correct:"ccd",
+    explanation:"CCD Chili Mocha takes the berry badge this round."
+  },
+  {
+    category:"PIZZA PUZZLE",
+    question:"Which option belongs to your CCD collection?",
+    ccd:{emoji:"🍕",name:"Mini Tortilla Pizza",calories:240,protein:"14g"},
+    classic:{emoji:"🍕",name:"Fast-Food Personal Pizza",calories:520,protein:"18g"},
+    correct:"ccd",
+    explanation:"Mini Tortilla Pizza is the CCD recipe. Battle complete!"
+  }
+];
 
-berrybelleButton.addEventListener("click", () => {
-  berrybelleMessage.textContent = berryMessages[berryIndex];
-  berryIndex = (berryIndex + 1) % berryMessages.length;
-});
+let state = loadState();
+let activeRecipeFilter = "all";
+let recipeSearchQuery = "";
+let toastTimer = null;
+let battleLocked = false;
 
-window.addEventListener("hashchange", () => {
-  goTo(location.hash.replace("#", "") || "home", false);
-});
+const views = [...document.querySelectorAll("[data-view]")];
+const navButtons = [...document.querySelectorAll(".nav-button")];
+const lessonDialog = document.querySelector("#lesson-dialog");
+const toast = document.querySelector("#toast");
 
-renderRecipes();
-renderFavorites();
-goTo(location.hash.replace("#", "") || "home", false);
+function loadState(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if(!saved || typeof saved !== "object") return {...defaultState};
+    return {
+      ...defaultState,
+      ...saved,
+      savedRecipes:Array.isArray(saved.savedRecipes) ? saved.savedRecipes : []
+    };
+  }catch(error){
+    console.warn("Could not load Berry Vibes progress:", error);
+    return {...defaultState};
+  }
+}
+
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(error){
+    console.warn("Could not save Berry Vibes progress:", error);
+  }
+}
+
+function setText(selector,value){
+  const el=document.querySelector(selector);
+  if(el) el.textContent=String(value);
+}
+
+function showToast(message){
+  toast.textContent=message;
+  toast.classList.add("show-toast");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toast.classList.remove("show-toast"),2200);
+}
+
+function setView(viewName){
+  const target=document.querySelector(`[data-view="${viewName}"]`);
+  if(!target) return;
+
+  views.forEach(view=>view.classList.toggle("active-view",view.dataset.view===viewName));
+  navButtons.forEach(button=>button.classList.toggle("active-nav",button.dataset.viewTarget===viewName));
+
+  state.currentView=viewName;
+  saveState();
+
+  window.scrollTo({top:0,behavior:"smooth"});
+
+  if(viewName==="recipes") renderRecipes();
+  if(viewName==="profile") updateStats();
+}
+
+function updateStats(){
+  const savedCount=state.savedRecipes.length;
+  const level=Math.max(1,Math.floor(state.xp/500)+1);
+  const dailyPercent=Math.min(100,Math.round((state.dailyXp/100)*100));
+
+  setText("#top-streak",state.streak);
+  setText("#top-xp",state.xp);
+  setText("#top-hearts",state.hearts);
+  setText("#daily-xp",state.dailyXp);
+  setText("#daily-percent",`${dailyPercent}%`);
+  setText("#side-streak",state.streak);
+  setText("#profile-streak",state.streak);
+  setText("#profile-xp",state.xp);
+  setText("#profile-saved",savedCount);
+  setText("#profile-level",level);
+  setText("#saved-count",`${savedCount} saved`);
+
+  const ring=document.querySelector(".progress-ring");
+  if(ring){
+    ring.style.background=`radial-gradient(circle at center,#fff 53%,transparent 54%),conic-gradient(var(--berry-500) 0 ${dailyPercent}%,var(--berry-100) ${dailyPercent}% 100%)`;
+  }
+}
+
+function addXp(amount,message=""){
+  state.xp+=amount;
+  state.dailyXp=Math.min(100,state.dailyXp+amount);
+  saveState();
+  updateStats();
+  showToast(message?`+${amount} XP · ${message}`:`+${amount} Berry XP! ✨`);
+}
+
+function openLessonDialog(){
+  if(typeof lessonDialog.showModal==="function") lessonDialog.showModal();
+  else setView("battle");
+}
+
+function closeLessonDialog(){
+  if(lessonDialog.open) lessonDialog.close();
+}
+
+function escapeHtml(value){
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function renderRecipes(){
+  const grid=document.querySelector("#recipe-grid");
+  if(!grid) return;
+
+  const query=recipeSearchQuery.trim().toLowerCase();
+  const filtered=recipes.filter(recipe=>{
+    const categoryMatch=activeRecipeFilter==="all"||recipe.category===activeRecipeFilter;
+    const searchMatch=!query||
+      recipe.name.toLowerCase().includes(query)||
+      recipe.description.toLowerCase().includes(query)||
+      recipe.tags.some(tag=>tag.toLowerCase().includes(query));
+    return categoryMatch&&searchMatch;
+  });
+
+  grid.innerHTML="";
+
+  if(!filtered.length){
+    grid.innerHTML=`<div class="empty-state"><div style="font-size:3rem">🍓</div><h3>No cozy recipes found</h3><p>Try another search or filter.</p></div>`;
+    return;
+  }
+
+  filtered.forEach(recipe=>{
+    const saved=state.savedRecipes.includes(recipe.id);
+    const card=document.createElement("article");
+    card.className="recipe-card";
+    card.innerHTML=`
+      <div class="recipe-visual" aria-hidden="true">${recipe.emoji}</div>
+      <div class="recipe-card-body">
+        <h3>${escapeHtml(recipe.name)}</h3>
+        <p>${escapeHtml(recipe.description)}</p>
+        <div class="recipe-tag-row">${recipe.tags.map(tag=>`<span class="recipe-tag">${escapeHtml(tag)}</span>`).join("")}</div>
+        <div class="recipe-actions">
+          <button type="button" class="save-recipe ${saved?"saved":""}" data-save-recipe="${recipe.id}">${saved?"♥ SAVED":"♡ SAVE"}</button>
+          <button type="button" class="battle-recipe" data-battle-recipe="${recipe.id}">⚔ BATTLE</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function toggleSaveRecipe(recipeId){
+  if(state.savedRecipes.includes(recipeId)){
+    state.savedRecipes=state.savedRecipes.filter(id=>id!==recipeId);
+    showToast("Recipe removed from your cozy cookbook.");
+  }else{
+    state.savedRecipes.push(recipeId);
+    state.xp+=5;
+    state.dailyXp=Math.min(100,state.dailyXp+5);
+    showToast("+5 XP · Recipe saved 💗");
+  }
+  saveState();
+  updateStats();
+  renderRecipes();
+}
+
+function renderBattle(){
+  const round=battleRounds[state.battleIndex % battleRounds.length];
+
+  setText("#battle-counter",`${state.battleIndex+1} / ${battleRounds.length}`);
+  setText("#battle-category",round.category);
+  setText("#battle-question",round.question);
+  setText("#ccd-food",round.ccd.emoji);
+  setText("#ccd-name",round.ccd.name);
+  setText("#ccd-cal",round.ccd.calories);
+  setText("#ccd-protein",round.ccd.protein);
+  setText("#classic-food",round.classic.emoji);
+  setText("#classic-name",round.classic.name);
+  setText("#classic-cal",round.classic.calories);
+  setText("#classic-protein",round.classic.protein);
+
+  const bar=document.querySelector("#battle-progress-bar");
+  if(bar) bar.style.width=`${((state.battleIndex+1)/battleRounds.length)*100}%`;
+
+  document.querySelectorAll(".choice-card").forEach(card=>{
+    card.classList.remove("correct-choice","wrong-choice");
+    card.disabled=false;
+  });
+
+  const feedback=document.querySelector("#battle-feedback");
+  feedback.className="battle-feedback";
+  feedback.innerHTML=`<div class="feedback-icon">🍓</div><div><strong>Choose your answer!</strong><p>BerryBelle will tell you how it went.</p></div>`;
+
+  document.querySelector("#next-battle").hidden=true;
+  battleLocked=false;
+}
+
+function handleBattleChoice(choice){
+  if(battleLocked) return;
+  battleLocked=true;
+
+  const round=battleRounds[state.battleIndex % battleRounds.length];
+  const isCorrect=choice===round.correct;
+  const selected=document.querySelector(`.choice-card[data-choice="${choice}"]`);
+  const correct=document.querySelector(`.choice-card[data-choice="${round.correct}"]`);
+
+  document.querySelectorAll(".choice-card").forEach(card=>card.disabled=true);
+  correct?.classList.add("correct-choice");
+  if(!isCorrect) selected?.classList.add("wrong-choice");
+
+  const feedback=document.querySelector("#battle-feedback");
+
+  if(isCorrect){
+    state.battleCorrect+=1;
+    feedback.className="battle-feedback success-feedback";
+    feedback.innerHTML=`<div class="feedback-icon">🏆</div><div><strong>Cozy win!</strong><p>${escapeHtml(round.explanation)}</p></div>`;
+    addXp(20,"Battle win");
+  }else{
+    feedback.className="battle-feedback error-feedback";
+    feedback.innerHTML=`<div class="feedback-icon">💡</div><div><strong>Almost!</strong><p>${escapeHtml(round.explanation)} The correct answer is highlighted.</p></div>`;
+    showToast("Good try — the correct choice is glowing.");
+  }
+
+  saveState();
+  document.querySelector("#next-battle").hidden=false;
+}
+
+function nextBattle(){
+  if(state.battleIndex>=battleRounds.length-1){
+    const score=state.battleCorrect;
+    state.battleIndex=0;
+    state.battleCorrect=0;
+    saveState();
+    renderBattle();
+    showToast(`Battle set complete! ${score}/${battleRounds.length} cozy wins 🏆`);
+    setView("path");
+    return;
+  }
+
+  state.battleIndex+=1;
+  saveState();
+  renderBattle();
+}
+
+function resetDemo(){
+  if(!window.confirm("Reset Berry Vibes demo progress?")) return;
+  state={...defaultState,savedRecipes:[]};
+  saveState();
+  updateStats();
+  renderRecipes();
+  renderBattle();
+  setView("home");
+  showToast("Demo progress reset.");
+}
+
+function wireEvents(){
+  document.addEventListener("click",event=>{
+    const viewButton=event.target.closest("[data-view-target]");
+    if(viewButton){
+      setView(viewButton.dataset.viewTarget);
+      return;
+    }
+
+    const worldButton=event.target.closest("[data-world]");
+    if(worldButton){
+      activeRecipeFilter=worldButton.dataset.world;
+      setView("recipes");
+      document.querySelectorAll(".filter-chip").forEach(button=>{
+        button.classList.toggle("active-filter",button.dataset.filter===activeRecipeFilter);
+      });
+      renderRecipes();
+      return;
+    }
+
+    const lessonNode=event.target.closest("[data-lesson]");
+    if(lessonNode){
+      if(lessonNode.dataset.lesson==="food-battle") openLessonDialog();
+      else showToast("Lesson complete in this demo ✨");
+      return;
+    }
+
+    const choice=event.target.closest(".choice-card[data-choice]");
+    if(choice){
+      handleBattleChoice(choice.dataset.choice);
+      return;
+    }
+
+    const saveButton=event.target.closest("[data-save-recipe]");
+    if(saveButton){
+      toggleSaveRecipe(saveButton.dataset.saveRecipe);
+      return;
+    }
+
+    const battleButton=event.target.closest("[data-battle-recipe]");
+    if(battleButton){
+      setView("battle");
+      showToast("Recipe battle loaded! ⚔️");
+      return;
+    }
+
+    const statButton=event.target.closest("[data-stat]");
+    if(statButton){
+      if(statButton.dataset.stat==="streak") showToast(`${state.streak}-day cozy streak 🔥`);
+      if(statButton.dataset.stat==="xp") showToast(`${state.xp} Berry XP collected ✨`);
+      if(statButton.dataset.stat==="hearts") showToast(`${state.hearts} hearts available 💗`);
+    }
+  });
+
+  document.querySelector("#next-battle")?.addEventListener("click",nextBattle);
+
+  document.querySelector("#recipe-search")?.addEventListener("input",event=>{
+    recipeSearchQuery=event.target.value;
+    renderRecipes();
+  });
+
+  document.querySelector("#recipe-filters")?.addEventListener("click",event=>{
+    const filterButton=event.target.closest("[data-filter]");
+    if(!filterButton) return;
+
+    activeRecipeFilter=filterButton.dataset.filter;
+    document.querySelectorAll(".filter-chip").forEach(button=>{
+      button.classList.toggle("active-filter",button===filterButton);
+    });
+    renderRecipes();
+  });
+
+  document.querySelector(".dialog-close")?.addEventListener("click",closeLessonDialog);
+  document.querySelector("#start-lesson-button")?.addEventListener("click",()=>{
+    closeLessonDialog();
+    setView("battle");
+    renderBattle();
+  });
+
+  lessonDialog?.addEventListener("click",event=>{
+    const rect=lessonDialog.getBoundingClientRect();
+    const outside=event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom;
+    if(outside) closeLessonDialog();
+  });
+
+  document.querySelector("#reset-progress")?.addEventListener("click",resetDemo);
+}
+
+function init(){
+  wireEvents();
+  updateStats();
+  renderRecipes();
+  renderBattle();
+
+  const start=document.querySelector(`[data-view="${state.currentView}"]`) ? state.currentView : "home";
+  setView(start);
+}
+
+init();
