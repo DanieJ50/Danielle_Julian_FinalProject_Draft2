@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Berry Vibes Studio — a playful Cozy Core Diet recipe discovery and food battle website.">
+  <meta name="theme-color" content="#ff7ba8">
+  <meta name="description" content="Berry Vibes Studio — a playful gamified recipe discovery experience.">
   <title>Berry Vibes Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,250 +12,178 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="js/app.js" defer></script>
 </head>
-
 <body>
-  <div class="berry-bg" aria-hidden="true"></div>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="brand-button" type="button" data-view-target="home" aria-label="Go home">
+        <span class="brand-mark">🍓</span>
+        <span class="brand-name">Berry Vibes</span>
+      </button>
+      <div class="top-stats" aria-label="Player stats">
+        <button class="stat-pill" type="button" data-stat="streak" title="Daily streak"><span>🔥</span><strong id="top-streak">12</strong></button>
+        <button class="stat-pill" type="button" data-stat="xp" title="Berry XP"><span>✨</span><strong id="top-xp">3957</strong></button>
+        <button class="stat-pill" type="button" data-stat="hearts" title="Hearts"><span>💗</span><strong id="top-hearts">5</strong></button>
+      </div>
+    </header>
 
-  <header class="nav-shell">
-    <a class="brand" href="#home" data-route="home">🍓 Berry Vibes Studio</a>
+    <main class="main-content">
+      <section class="view active-view" id="view-home" data-view="home">
+        <div class="home-grid">
+          <section class="hero-card">
+            <div class="hero-copy">
+              <span class="eyebrow">🍓 YOUR COZY RECIPE ADVENTURE</span>
+              <h1>Cook. Compare. Collect cozy wins.</h1>
+              <p class="hero-text">Explore CCD recipes like a game: complete food battles, earn Berry XP, unlock recipe worlds, and build your own comfort-food journey.</p>
+              <div class="hero-actions">
+                <button class="big-button primary-button" type="button" data-view-target="path">CONTINUE PATH <span>→</span></button>
+                <button class="big-button secondary-button" type="button" data-view-target="battle">QUICK BATTLE <span>⚔️</span></button>
+              </div>
+            </div>
 
-    <button id="menuButton" class="menu-button" type="button" aria-expanded="false">☰</button>
+            <div class="hero-mascot">
+              <div class="mascot-stage">
+                <div class="sparkle sparkle-one">✦</div>
+                <div class="sparkle sparkle-two">✦</div>
+                <div class="sparkle sparkle-three">♥</div>
+                <div class="berrybelle">
+                  <div class="carton-top"><div class="cap"></div></div>
+                  <div class="carton-body">
+                    <div class="face"><span class="eye"></span><span class="eye"></span><span class="smile"></span></div>
+                    <div class="cheeks"><span></span><span></span></div>
+                    <div class="strawberry-emblem">🍓</div>
+                    <div class="arm arm-left"></div><div class="arm arm-right"></div>
+                    <div class="leg leg-left"></div><div class="leg leg-right"></div>
+                  </div>
+                </div>
+                <div class="speech-bubble">Ready for a cozy win?</div>
+              </div>
+            </div>
+          </section>
 
-    <nav id="mainNav" class="main-nav">
-      <a href="#home" class="nav-link active" data-route="home">Home</a>
-      <a href="#recipes" class="nav-link" data-route="recipes">Recipes</a>
-      <a href="#battles" class="nav-link" data-route="battles">Food Battles</a>
-      <a href="#about" class="nav-link" data-route="about">About CCD</a>
-      <a href="#berrybelle" class="nav-link" data-route="berrybelle">Meet BerryBelle</a>
+          <aside class="daily-card">
+            <div class="daily-heading"><div><span class="eyebrow">TODAY'S GOAL</span><h2>Berry Boost</h2></div><span class="goal-icon">🎯</span></div>
+            <div class="goal-progress">
+              <div class="progress-ring"><span id="daily-percent">70%</span></div>
+              <div><strong><span id="daily-xp">70</span> / 100 XP</strong><p>Finish one lesson to keep your streak glowing.</p></div>
+            </div>
+            <button class="small-button" type="button" data-view-target="path">KEEP GOING</button>
+          </aside>
+        </div>
+
+        <section class="section-block">
+          <div class="section-title-row">
+            <div><span class="eyebrow">YOUR WORLDS</span><h2>Pick your craving</h2></div>
+            <button class="text-button" type="button" data-view-target="recipes">See all recipes →</button>
+          </div>
+          <div class="world-grid">
+            <button class="world-card pink-world" type="button" data-world="breakfast"><span class="world-icon">🥞</span><span><strong>Sweet Breakfast</strong><small>Pancakes, rolls & cozy starts</small></span><span class="world-arrow">›</span></button>
+            <button class="world-card cocoa-world" type="button" data-world="chocolate"><span class="world-icon">🍫</span><span><strong>Chocolate Comfort</strong><small>Brownies, cakes & cocoa magic</small></span><span class="world-arrow">›</span></button>
+            <button class="world-card green-world" type="button" data-world="drinks"><span class="world-icon">☕</span><span><strong>Coffee-Shop Vibes</strong><small>Lattes, mochas & warm sips</small></span><span class="world-arrow">›</span></button>
+            <button class="world-card orange-world" type="button" data-world="savory"><span class="world-icon">🌯</span><span><strong>Savory & Cozy</strong><small>Wraps, pizza & comfort meals</small></span><span class="world-arrow">›</span></button>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" id="view-path" data-view="path">
+        <section class="path-header-card">
+          <div><span class="eyebrow">WORLD 1 · SWEET BREAKFAST</span><h1>Fluffy Morning Trail</h1><p>Complete each node to unlock the next cozy recipe challenge.</p></div>
+          <div class="world-progress"><span>3 / 8 complete</span><div class="mini-progress"><div style="width:37.5%"></div></div></div>
+        </section>
+
+        <div class="path-layout">
+          <section class="lesson-path">
+            <article class="path-node-row left-node"><div class="node-label"><strong>Pancake Basics</strong><span>Complete · +20 XP</span></div><button class="lesson-node completed-node" type="button" data-lesson="done"><span>⭐</span></button></article>
+            <article class="path-node-row right-node"><button class="lesson-node completed-node" type="button" data-lesson="done"><span>🥞</span></button><div class="node-label"><strong>Texture Match</strong><span>Complete · +25 XP</span></div></article>
+            <article class="path-node-row left-node"><div class="node-label"><strong>Cinnamon Quiz</strong><span>Complete · +30 XP</span></div><button class="lesson-node completed-node" type="button" data-lesson="done"><span>📖</span></button></article>
+            <article class="path-node-row right-node"><button class="lesson-node current-node" type="button" data-lesson="food-battle"><span>⚔️</span><span class="pulse-ring"></span></button><div class="node-label current-label"><strong>Recipe Battle</strong><span>Current · Earn up to 40 XP</span></div></article>
+            <article class="path-node-row left-node locked-row"><div class="node-label"><strong>Ingredient Puzzle</strong><span>Locked</span></div><button class="lesson-node locked-node" type="button" disabled><span>🔒</span></button></article>
+            <article class="path-node-row right-node locked-row"><button class="lesson-node locked-node" type="button" disabled><span>🔒</span></button><div class="node-label"><strong>Fluffy Boss Round</strong><span>Locked</span></div></article>
+          </section>
+          <aside class="path-sidebar">
+            <article class="streak-card"><div class="streak-flame">🔥</div><div><span class="eyebrow">STREAK</span><h3><span id="side-streak">12</span> cozy days</h3><p>Come back tomorrow to keep it alive.</p></div></article>
+            <article class="chest-card"><span class="chest-icon">🎁</span><div><span class="eyebrow">NEXT REWARD</span><h3>Berry Chest</h3><p>Complete 2 more nodes.</p></div></article>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="view-battle" data-view="battle">
+        <section class="battle-header">
+          <div><span class="eyebrow">⚔️ CCD BATTLE ARENA</span><h1>Same craving. Different vibe.</h1><p>Compare the two choices and pick the one that matches the challenge.</p></div>
+          <div class="battle-progress-wrap"><span id="battle-counter">1 / 4</span><div class="mini-progress"><div id="battle-progress-bar" style="width:25%"></div></div></div>
+        </section>
+
+        <section class="battle-card">
+          <div class="battle-question"><span class="question-chip" id="battle-category">DONUT DUEL</span><h2 id="battle-question">Which option has the lighter calorie profile?</h2></div>
+          <div class="battle-grid">
+            <button class="choice-card" type="button" data-choice="ccd"><span class="choice-badge">CCD</span><div class="food-visual" id="ccd-food">🍩</div><h3 id="ccd-name">CCD Microwave Donut</h3><div class="nutrition-row"><span><strong id="ccd-cal">120</strong> cal</span><span><strong id="ccd-protein">6g</strong> protein</span></div></button>
+            <div class="vs-badge">VS</div>
+            <button class="choice-card" type="button" data-choice="classic"><span class="choice-badge classic-badge">CLASSIC</span><div class="food-visual" id="classic-food">🍩</div><h3 id="classic-name">Fast-Food Donut</h3><div class="nutrition-row"><span><strong id="classic-cal">260</strong> cal</span><span><strong id="classic-protein">4g</strong> protein</span></div></button>
+          </div>
+          <div class="battle-feedback" id="battle-feedback" aria-live="polite"><div class="feedback-icon">🍓</div><div><strong>Choose your answer!</strong><p>BerryBelle will tell you how it went.</p></div></div>
+          <button class="big-button primary-button next-battle-button" id="next-battle" type="button" hidden>NEXT BATTLE →</button>
+        </section>
+      </section>
+
+      <section class="view" id="view-recipes" data-view="recipes">
+        <section class="recipes-heading">
+          <div><span class="eyebrow">🍓 RECIPE COLLECTION</span><h1>Build your cozy cookbook</h1><p>Search, filter, save favorites, and jump into recipe battles.</p></div>
+          <div class="saved-counter"><span>💗</span><strong id="saved-count">0 saved</strong></div>
+        </section>
+        <div class="recipe-toolbar">
+          <label class="search-box"><span>🔎</span><input id="recipe-search" type="search" placeholder="Search cozy recipes..."></label>
+          <div class="filter-row" id="recipe-filters">
+            <button class="filter-chip active-filter" type="button" data-filter="all">All</button>
+            <button class="filter-chip" type="button" data-filter="breakfast">🥞 Breakfast</button>
+            <button class="filter-chip" type="button" data-filter="chocolate">🍫 Chocolate</button>
+            <button class="filter-chip" type="button" data-filter="drinks">☕ Drinks</button>
+            <button class="filter-chip" type="button" data-filter="savory">🌯 Savory</button>
+          </div>
+        </div>
+        <div class="recipe-grid" id="recipe-grid"></div>
+      </section>
+
+      <section class="view" id="view-profile" data-view="profile">
+        <section class="profile-hero">
+          <div class="profile-avatar">🍓</div>
+          <div class="profile-copy"><span class="eyebrow">BERRY VIBES PLAYER</span><h1>Danielle</h1><p>Cozy Explorer · Level <span id="profile-level">8</span></p></div>
+          <button class="settings-button" type="button" id="reset-progress">Reset demo</button>
+        </section>
+
+        <div class="profile-grid">
+          <article class="profile-stat-card"><span>🔥</span><strong id="profile-streak">12</strong><small>Day streak</small></article>
+          <article class="profile-stat-card"><span>✨</span><strong id="profile-xp">3957</strong><small>Berry XP</small></article>
+          <article class="profile-stat-card"><span>🏆</span><strong>Diamond</strong><small>League</small></article>
+          <article class="profile-stat-card"><span>💗</span><strong id="profile-saved">0</strong><small>Saved recipes</small></article>
+        </div>
+
+        <section class="achievement-section">
+          <div class="section-title-row"><div><span class="eyebrow">ACHIEVEMENTS</span><h2>Your cozy badges</h2></div></div>
+          <div class="badge-grid">
+            <article class="achievement-badge earned-badge"><span>🥞</span><strong>Pancake Pro</strong><small>Complete 3 breakfast lessons</small></article>
+            <article class="achievement-badge earned-badge"><span>⚔️</span><strong>Battle Berry</strong><small>Win your first food battle</small></article>
+            <article class="achievement-badge"><span>☕</span><strong>Café Collector</strong><small>Save 5 drink recipes</small></article>
+            <article class="achievement-badge"><span>🌟</span><strong>Cozy Legend</strong><small>Reach 5,000 Berry XP</small></article>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Primary navigation">
+      <button class="nav-button active-nav" type="button" data-view-target="home"><span>🏠</span><small>Home</small></button>
+      <button class="nav-button" type="button" data-view-target="path"><span>🗺️</span><small>Path</small></button>
+      <button class="nav-button battle-nav-button" type="button" data-view-target="battle"><span>⚔️</span><small>Battle</small></button>
+      <button class="nav-button" type="button" data-view-target="recipes"><span>📚</span><small>Recipes</small></button>
+      <button class="nav-button" type="button" data-view-target="profile"><span>👤</span><small>Profile</small></button>
     </nav>
 
-    <button id="favoritesButton" class="favorite-nav" type="button">♥ <span id="favoriteCount">0</span></button>
-  </header>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <main class="site-main">
-
-    <section id="home" class="page active" data-page="home">
-      <section class="hero panel">
-        <div class="hero-copy">
-          <p class="eyebrow">Berry Vibes Studio presents</p>
-          <h1>
-            <span class="welcome">WELCOME TO</span>
-            <span class="berry-title">BERRY VIBES</span>
-            <span class="studio-title">STUDIO</span>
-          </h1>
-
-          <p class="hero-text">
-            Explore Cozy Core Diet recipes through playful comparison battles,
-            craving-based paths, and comfort-food discovery.
-          </p>
-
-          <div class="hero-buttons">
-            <button class="pill pink-button route-button" data-go="recipes" type="button">🍓 Explore Recipes</button>
-            <button class="pill green-button route-button" data-go="battles" type="button">⚔️ Start a Food Battle</button>
-            <button class="pill cream-button route-button" data-go="about" type="button">📖 Discover CCD</button>
-            <button class="pill soft-button route-button" data-go="berrybelle" type="button">🎀 Meet BerryBelle</button>
-          </div>
-        </div>
-
-        <div class="mascot-card">
-          <div class="mascot" aria-label="BerryBelle mascot">
-            <div class="carton-lid"><span></span></div>
-            <div class="carton">
-              <div class="eyes"><i></i><i></i></div>
-              <div class="smile"></div>
-              <div class="blush left"></div>
-              <div class="blush right"></div>
-              <div class="strawberry">🍓</div>
-            </div>
-            <div class="arm left-arm"></div>
-            <div class="arm right-arm"></div>
-            <div class="leg left-leg"></div>
-            <div class="leg right-leg"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="home-cards">
-        <button class="home-card breakfast-card filter-route" data-go="recipes" data-filter="breakfast" type="button">
-          <span class="home-icon">🥞</span>
-          <div>
-            <h2>Sweet Breakfast</h2>
-            <p>Bright, cozy bites to start your day right.</p>
-            <strong>Explore →</strong>
-          </div>
-        </button>
-
-        <button class="home-card chocolate-card filter-route" data-go="recipes" data-filter="chocolate" type="button">
-          <span class="home-icon">🍫</span>
-          <div>
-            <h2>Chocolate Comfort</h2>
-            <p>Rich, warm treats for your coziest moments.</p>
-            <strong>Explore →</strong>
-          </div>
-        </button>
-
-        <button class="home-card coffee-card filter-route" data-go="recipes" data-filter="drinks" type="button">
-          <span class="home-icon">☕</span>
-          <div>
-            <h2>Coffee-Shop Vibes</h2>
-            <p>Café favorites to sip, savor, and unwind.</p>
-            <strong>Explore →</strong>
-          </div>
-        </button>
-      </section>
-
-      <section class="cravings panel">
-        <div>
-          <p class="eyebrow">Choose your path</p>
-          <h2>What are you craving today?</h2>
-        </div>
-        <div class="craving-grid">
-          <button class="craving filter-route" data-go="recipes" data-filter="breakfast" type="button">🥞 <strong>Sweet Breakfast</strong><small>Soft, warm, cinnamon-forward favorites.</small></button>
-          <button class="craving filter-route" data-go="recipes" data-filter="chocolate" type="button">🍫 <strong>Chocolate Comfort</strong><small>Rich cocoa treats and dessert energy.</small></button>
-          <button class="craving filter-route" data-go="recipes" data-filter="drinks" type="button">☕ <strong>Coffee-Shop Vibes</strong><small>Warm and iced café-inspired sips.</small></button>
-          <button class="craving filter-route" data-go="recipes" data-filter="savory" type="button">🌯 <strong>Savory & Cozy</strong><small>Comforting wraps, pizzas, and bowls.</small></button>
-        </div>
-      </section>
-    </section>
-
-    <section id="recipes" class="page" data-page="recipes">
-      <section class="banner panel">
-        <div>
-          <p class="eyebrow">Recipe collection</p>
-          <h1>Find Your Cozy Favorite</h1>
-          <p>Search, filter, save favorites, and open recipe cards for more details.</p>
-        </div>
-        <div class="banner-icons">🍓🥞🍫☕</div>
-      </section>
-
-      <section class="controls panel">
-        <label>
-          Search recipes
-          <input id="recipeSearch" type="search" placeholder="Try cinnamon, mocha, pizza…">
-        </label>
-        <div id="filters" class="filters">
-          <button class="filter active" data-filter="all" type="button">All</button>
-          <button class="filter" data-filter="breakfast" type="button">🥞 Breakfast</button>
-          <button class="filter" data-filter="chocolate" type="button">🍫 Chocolate</button>
-          <button class="filter" data-filter="drinks" type="button">☕ Drinks</button>
-          <button class="filter" data-filter="savory" type="button">🌯 Savory</button>
-          <button class="filter" data-filter="bakery" type="button">🍩 Bakery</button>
-        </div>
-      </section>
-
-      <div id="recipeGrid" class="recipe-grid"></div>
-    </section>
-
-    <section id="battles" class="page" data-page="battles">
-      <section class="battle panel">
-        <div class="battle-label">⚔️ RECIPE BATTLE</div>
-        <h1>CCD CINNAMON ROLLS <span>VS</span> BAKERY STYLE ROLL</h1>
-
-        <div class="battle-grid">
-          <article class="battle-card ccd">
-            <h2>CCD Microwave Cinnamon Rolls</h2>
-            <div class="roll-icon">🌀</div>
-            <ul>
-              <li>✓ Soft and fluffy</li>
-              <li>✓ Cozy cinnamon swirl</li>
-              <li>✓ Homemade in minutes</li>
-            </ul>
-          </article>
-
-          <div class="vs">VS</div>
-
-          <article class="battle-card bakery">
-            <h2>Bakery Style Roll</h2>
-            <div class="roll-icon">🍥</div>
-            <ul>
-              <li>✓ Larger portion</li>
-              <li>✓ Sweet icing glaze</li>
-              <li>✓ Classic bakery comfort</li>
-            </ul>
-          </article>
-        </div>
-
-        <div class="battle-finish">
-          <p class="bubble">BerryBelle says: Battle time! 💗</p>
-          <h2>CHOOSE YOUR <span>COZY WINNER</span></h2>
-          <div class="battle-buttons">
-            <button class="pill pink-button battle-choice" data-choice="ccd" type="button">🍓 Choose CCD</button>
-            <button class="pill green-button battle-choice" data-choice="bakery" type="button">🥐 Choose Bakery</button>
-          </div>
-          <div id="battleResult" class="battle-result" aria-live="polite">Pick a side to reveal BerryBelle’s reaction.</div>
-        </div>
-      </section>
-    </section>
-
-    <section id="about" class="page" data-page="about">
-      <section class="banner panel">
-        <div>
-          <p class="eyebrow">About the project</p>
-          <h1>What Is CCD?</h1>
-          <p>Cozy Core Diet is a personal recipe system centered on comforting flavors, playful remixes, and foods that feel familiar and fun.</p>
-        </div>
-        <div class="banner-icons">📖🍓✨</div>
-      </section>
-
-      <div class="info-grid">
-        <article class="info panel"><span>🎨</span><h2>Design + Food</h2><p>Berry Vibes Studio combines recipe discovery with branding, illustration, interaction design, and playful navigation.</p></article>
-        <article class="info panel"><span>🧭</span><h2>Nonlinear Exploration</h2><p>Visitors can browse by craving, jump into a battle, save favorites, or follow BerryBelle through different paths.</p></article>
-        <article class="info panel"><span>⚔️</span><h2>Comparison Battles</h2><p>Food battles make recipe comparison feel playful instead of reading like a plain information list.</p></article>
-      </div>
-    </section>
-
-    <section id="berrybelle" class="page" data-page="berrybelle">
-      <section class="berrybelle-page panel">
-        <div class="mascot mascot-bounce">
-          <div class="carton-lid"><span></span></div>
-          <div class="carton"><div class="eyes"><i></i><i></i></div><div class="smile"></div><div class="blush left"></div><div class="blush right"></div><div class="strawberry">🍓</div></div>
-          <div class="arm left-arm"></div><div class="arm right-arm"></div><div class="leg left-leg"></div><div class="leg right-leg"></div>
-        </div>
-
-        <div>
-          <p class="eyebrow">Studio mascot</p>
-          <h1>Meet BerryBelle</h1>
-          <p>BerryBelle is the strawberry-milk-carton mascot who guides visitors through Berry Vibes Studio.</p>
-          <div class="facts">
-            <span>🍓 Sweet-breakfast fan</span>
-            <span>🎀 Certified cozy guide</span>
-            <span>⚔️ Food-battle referee</span>
-            <span>✨ Sparkle distributor</span>
-          </div>
-          <button id="berrybelleButton" class="pill pink-button" type="button">Say Hi to BerryBelle 🍓</button>
-          <p id="berrybelleMessage" class="berry-message">BerryBelle is waiting for you.</p>
-        </div>
-      </section>
-    </section>
-  </main>
-
-  <dialog id="recipeDialog" class="recipe-dialog">
-    <button id="closeDialog" class="close-button" type="button">×</button>
-    <div class="dialog-header">
-      <div id="dialogIcon" class="dialog-icon">🥞</div>
-      <div>
-        <p id="dialogCategory" class="eyebrow"></p>
-        <h2 id="dialogTitle"></h2>
-        <p id="dialogDescription"></p>
-      </div>
-    </div>
-    <div class="dialog-grid">
-      <section><h3>What to Expect</h3><p id="dialogExpect"></p></section>
-      <section><h3>BerryBelle’s Tip</h3><p id="dialogTip"></p></section>
-    </div>
-    <button id="dialogSave" class="pill pink-button" type="button">♡ Save Recipe</button>
-  </dialog>
-
-  <aside id="favoritesDrawer" class="favorites-drawer" aria-hidden="true">
-    <div class="drawer-heading">
-      <div><p class="eyebrow">Saved recipes</p><h2>Your Cozy Favorites</h2></div>
-      <button id="closeFavorites" class="close-button" type="button">×</button>
-    </div>
-    <div id="favoritesList"></div>
-  </aside>
-
-  <div id="toast" class="toast" aria-live="polite"></div>
-
-  <footer>Berry Vibes Studio · Designed and coded by Danielle Julian · Internet Studio 1 Final Project</footer>
+    <dialog class="lesson-dialog" id="lesson-dialog">
+      <div class="dialog-top"><div><span class="eyebrow">CURRENT LESSON</span><h2>Recipe Battle</h2></div><button class="dialog-close" type="button" aria-label="Close lesson">×</button></div>
+      <div class="dialog-illustration">⚔️🍓✨</div>
+      <p>Match the challenge, choose the best answer, and earn Berry XP. You have unlimited retries in this demo.</p>
+      <button class="big-button primary-button" id="start-lesson-button" type="button">START BATTLE</button>
+    </dialog>
+  </div>
 </body>
 </html>
